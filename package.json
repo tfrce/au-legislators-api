@@ -1,0 +1,19 @@
+{
+  "name": "legislators-api",
+  "version": "0.0.0",
+  "description": "legislators-api ===============",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rolandnsharp/legislators-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rolandnsharp/legislators-api/issues"
+  },
+  "homepage": "https://github.com/rolandnsharp/legislators-api"
+}
