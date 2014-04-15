@@ -1,15 +1,37 @@
 // web.js
 var express = require("express");
 var logfmt = require("logfmt");
+//require node modules (see package.json)
+var MongoClient = require('mongodb').MongoClient,
+    format = require('util').format;
+
+
 var app = express();
 
-app.use(logfmt.requestLogger());
 
-app.get('/', function(req, res) {
-  res.send('Hello World!');
-});
+MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
+    if (err) throw err;
+    var collection = db.collection('legislators');
 
-var port = Number(process.env.PORT || 5000);
-app.listen(port, function() {
-  console.log("Listening on " + port);
+
+
+    app.use(logfmt.requestLogger());
+
+    app.get('/', function(req, res) {
+       
+		collection.find().toArray(function(err, docs) {
+         res.send(docs);
+        });
+
+
+    
+    });
+    console.log(process.env.MONGOHQ_URL);
+
+    var port = Number(process.env.PORT || 5000);
+    app.listen(port, function() {
+        console.log("Listening on " + port);
+    });
+
+
 });
