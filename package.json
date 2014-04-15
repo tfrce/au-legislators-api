@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/rolandnsharp/legislators-api/issues"
   },
-  "homepage": "https://github.com/rolandnsharp/legislators-api"
+  "homepage": "https://github.com/rolandnsharp/legislators-api",
+  "dependencies": {
+    "express": "^4.0.0",
+    "logfmt": "^1.1.2"
+  }
 }
