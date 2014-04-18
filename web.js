@@ -23,7 +23,7 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
        
 		collection.find().toArray(function(err, docs) {
          // res.send(docs);
-         res.send(legislators:docs);
+         res.send({ legislators: docs });
         });
 
 
