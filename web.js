@@ -1,4 +1,5 @@
 // web.js
+var cors = require("cors");
 var express = require("express");
 var logfmt = require("logfmt");
 //require node modules (see package.json)
@@ -8,6 +9,7 @@ var MongoClient = require('mongodb').MongoClient,
 
 var app = express();
 
+app.use(cors());
 
 MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
     if (err) throw err;
@@ -20,7 +22,8 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
     app.get('/', function(req, res) {
        
 		collection.find().toArray(function(err, docs) {
-         res.send(docs);
+         // res.send(docs);
+         res.send(legislators:docs);
         });
 
 
