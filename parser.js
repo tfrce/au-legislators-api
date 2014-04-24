@@ -12,10 +12,12 @@ var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Res
 var postcode_object = {};
 function postcode_objectify(postcode_array) {
     for (var j = 0; j < postcode_array.length; j++) {
+      
        if (postcode_array[j][1] in postcode_object) {
-        postcode_object[postcode_array[j][1]] = postcode_object[postcode_array[j][1]]+','+postcode_array[j][0];
+
+        postcode_object[postcode_array[j][1]].push(postcode_array[j][0]);
        } else {
-        postcode_object[postcode_array[j][1]] = postcode_array[j][0];
+        postcode_object[postcode_array[j][1]] = [postcode_array[j][0]];
        }
     }
     // console.log(postcode_object);
@@ -49,11 +51,10 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
                 data.party = ($('dt:contains("Party")', legislator).next().text());
                 var location = $('dl dd', legislator).eq(0).text(); // make more specific (senator or member for)
                 location = location.split(',');
-                
                 data.state = location[1];
                 data.suburb = location[0];
-
                 data.postcode = postcode_object[location[0]];
+                
 
                 request('http://www.aph.gov.au/' + data.legislator_page, function(err, response, body) {
 
