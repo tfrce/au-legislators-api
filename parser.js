@@ -1,7 +1,4 @@
 var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?q=&mem=1&sen=1&par=-1&gen=0&ps=5&st=1';
-// var url = 'http://www.1&gen=0&ps=5&st=1';
-
-
 
 var request = require('request');
 var cheerio = require('cheerio');
@@ -10,16 +7,26 @@ var async = require('async');
 var MongoClient = require('mongodb').MongoClient,
     format = require('util').format;
 
-var csv = require("fast-csv");
+// var csv = require("fast-csv");
+// csv
+//  .fromPath("postcodes.csv")
+//  .on("record", function(adata){
+//      console.log(adata);
+//  })
+//  .on("end", function(){
+//      console.log("done");
+//  });
 
-csv
- .fromPath("postcode.csv")
- .on("record", function(adata){
-     console.log(adata);
- })
- .on("end", function(){
-     console.log("done");
- });
+var csv = require('csv');
+csv()
+.from.path(__dirname+'/postcodes.csv', { delimiter: ',', escape: '"' })
+.to.array( function(datac){
+  console.log(datac)
+} );
+
+
+
+
 
 MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
     if (err) throw err;
