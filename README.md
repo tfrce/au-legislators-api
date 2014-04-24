@@ -1,2 +1,2 @@
-legislators-api
+au-legislators-api
 ===============
