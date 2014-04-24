@@ -1,53 +1,30 @@
 var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?q=&mem=1&sen=1&par=-1&gen=0&ps=5&st=1';
-
+var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?expand=1&q=&mem=1&par=-1&gen=0&ps=25'
 var request = require('request');
 var cheerio = require('cheerio');
 var _ = require('lodash');
 var async = require('async');
+var csv = require('csv');
 var MongoClient = require('mongodb').MongoClient,
     format = require('util').format;
 
-// var csv = require("fast-csv");
-// csv
-//  .fromPath("postcodes.csv")
-//  .on("record", function(adata){
-//      console.log(adata);
-//  })
-//  .on("end", function(){
-//      console.log("done");
-//  });
-
-var csv = require('csv');
-
+var postcode_object = {};
 function postcode_objectify(postcode_array) {
-    var postcode_object = {};
     for (var j = 0; j < postcode_array.length; j++) {
-       
        if (postcode_array[j][1] in postcode_object) {
-
-       
         postcode_object[postcode_array[j][1]] = postcode_object[postcode_array[j][1]]+','+postcode_array[j][0];
-
        } else {
-       	
         postcode_object[postcode_array[j][1]] = postcode_array[j][0];
-
        }
     }
-    console.log(postcode_object);
+    // console.log(postcode_object);
 };
-
-
 
 csv()
 .from.path(__dirname + '/postcodes.csv', { delimiter: ',', escape: '"'})
 .to.array(function(dataX) { 
 	postcode_objectify(dataX); 
 });
-
-
-
-
 
 MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
     if (err) throw err;
@@ -70,7 +47,8 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
                 data.legislator_page = ($('.title a', legislator).attr('href'));
                 data.party = ($('dt:contains("Party")', legislator).next().text());
                 data.member_for = $('dl dd', legislator).eq(0).text(); // make more specific (senator or member for)
-                data.postcode = [];
+                var town = data.member_for.split(',');
+                data.postcode = postcode_object[town[0]];
 
                 request('http://www.aph.gov.au/' + data.legislator_page, function(err, response, body) {
 
