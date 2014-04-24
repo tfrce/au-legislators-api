@@ -1,5 +1,3 @@
-var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?q=&mem=1&sen=1&par=-1&gen=0&ps=5&st=1';
-var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?expand=1&q=&mem=1&par=-1&gen=0&ps=25'
 var request = require('request');
 var cheerio = require('cheerio');
 var _ = require('lodash');
@@ -7,6 +5,9 @@ var async = require('async');
 var csv = require('csv');
 var MongoClient = require('mongodb').MongoClient,
     format = require('util').format;
+
+var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?q=&mem=1&sen=1&par=-1&gen=0&ps=5&st=1';
+var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?expand=1&q=&mem=1&par=-1&gen=0&ps=25'
 
 var postcode_object = {};
 function postcode_objectify(postcode_array) {
@@ -46,9 +47,13 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
                 data.email = ($('.mail', legislator).attr('href'));
                 data.legislator_page = ($('.title a', legislator).attr('href'));
                 data.party = ($('dt:contains("Party")', legislator).next().text());
-                data.member_for = $('dl dd', legislator).eq(0).text(); // make more specific (senator or member for)
-                var town = data.member_for.split(',');
-                data.postcode = postcode_object[town[0]];
+                var location = $('dl dd', legislator).eq(0).text(); // make more specific (senator or member for)
+                location = location.split(',');
+                
+                data.state = location[1];
+                data.suburb = location[0];
+
+                data.postcode = postcode_object[location[0]];
 
                 request('http://www.aph.gov.au/' + data.legislator_page, function(err, response, body) {
 
