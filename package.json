@@ -17,11 +17,13 @@
   },
   "homepage": "https://github.com/rolandnsharp/legislators-api",
   "dependencies": {
+    "async": "^0.7.0",
     "cheerio": "^0.15.0",
     "cors": "^2.2.0",
     "express": "^4.0.0",
     "lodash": "^2.4.1",
     "logfmt": "^1.1.2",
-    "mongodb": "^1.4.0"
+    "mongodb": "^1.4.0",
+    "request": "^2.34.0"
   }
 }
