@@ -10,22 +10,48 @@ var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Res
 var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?expand=1&q=&mem=1&par=-1&gen=0&ps=25'
 
 var postcode_object = {};
+
 function postcode_objectify(postcode_array) {
     for (var j = 0; j < postcode_array.length; j++) {
-       if (postcode_array[j][1] in postcode_object) {
-        postcode_object[postcode_array[j][1]].push(postcode_array[j][0]);
-       } else {
-        postcode_object[postcode_array[j][1]] = [postcode_array[j][0]];
-       }
+        if (postcode_array[j][1] in postcode_object) {
+            postcode_object[postcode_array[j][1]].push(postcode_array[j][0]);
+        } else {
+            postcode_object[postcode_array[j][1]] = [postcode_array[j][0]];
+        }
     }
     // console.log(postcode_object);
 };
+console.log("hello");
+
+function postcode_to_state(postcode) {
+    if ((postcode >= 2600 && postcode <= 2618) || (String(postcode).substring(0, 2) == "29")) {
+        return 'ACT';
+    } else if (String(postcode).charAt(0) == "2") {
+        return 'NSW';
+    } else if (String(postcode).charAt(0) == "3") {
+        return 'VIC';
+    } else if (String(postcode).charAt(0) == "4") {
+        return 'QLD';
+    } else if (String(postcode).charAt(0) == "5") {
+        return 'SA';
+    } else if (String(postcode).charAt(0) == "6") {
+        return 'WA';
+    } else if (String(postcode).charAt(0) == "7") {
+        return 'TAS';
+    } else if (String(postcode).charAt(0) == "8" || String(postcode).charAt(0) == "9") {
+        return 'NT';
+    }
+};
+console.log(postcode_to_state(2611));
 
 csv()
-.from.path(__dirname + '/postcodes.csv', { delimiter: ',', escape: '"'})
-.to.array(function(dataX) { 
-	postcode_objectify(dataX); 
-});
+    .from.path(__dirname + '/postcodes.csv', {
+        delimiter: ',',
+        escape: '"'
+    })
+    .to.array(function(dataX) {
+        postcode_objectify(dataX);
+    });
 
 MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
     if (err) throw err;
@@ -52,16 +78,16 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
                 data.state = location[1];
                 data.electorate = location[0];
                 data.postcode = postcode_object[data.electorate];
-                
+
 
                 request('http://www.aph.gov.au/' + data.legislator_page, function(err, response, body) {
 
                     var $ = cheerio.load(body);
                     // data.summary = $('#member-summary').text();
                     var second_column = $('.col-third').eq(1).html();
-                    data.electorate_office_phone = $('dt:contains("phone")',second_column).next().text();
-                    data.electorate_office_fax = $('dt:contains("Fax")',second_column).next().text();
-                    data.electorate_office_toll_free = $('dt:contains("Free")',second_column).next().text();
+                    data.electorate_office_phone = $('dt:contains("phone")', second_column).next().text();
+                    data.electorate_office_fax = $('dt:contains("Fax")', second_column).next().text();
+                    data.electorate_office_toll_free = $('dt:contains("Free")', second_column).next().text();
 
                     collection.insert(data, function(err, docs) {
 
