@@ -25,6 +25,7 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
                 data.twitter = ($('.twitter', legislator).attr('href'));
                 data.facebook = ($('.facebook', legislator).attr('href'));
                 data.legislator_page = ($('.title a', legislator).attr('href'));
+                data.party = ($('dt:contains("Party")', legislator).next().text());
 
 
 
