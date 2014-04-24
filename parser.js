@@ -10,41 +10,37 @@ var MongoClient = require('mongodb').MongoClient,
 MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
     if (err) throw err;
     var collection = db.collection('legislators');
-    collection.remove({}, function(err, removed) {});
+    collection.remove({}, function(err, removed) {}); // remove entire collection
     request(url, function(err, response, body) {
         var $ = cheerio.load(body);
 
         var parseLegislators = function(legislators) {
             var legislator = legislators.pop();
             if (legislator) {
-                //do something
 
                 var data = {};
+
                 data.name = ($('.title a', legislator).text());
                 data.img_url = ($('img', legislator).attr('src'));
                 data.twitter = ($('.twitter', legislator).attr('href'));
                 data.facebook = ($('.facebook', legislator).attr('href'));
+                data.email = ($('.mail', legislator).attr('href'));
                 data.legislator_page = ($('.title a', legislator).attr('href'));
                 data.party = ($('dt:contains("Party")', legislator).next().text());
+                data.member_for = ($('dt:contains("Member")', legislator).text());//not working
 
+                request('http://www.aph.gov.au/' + data.legislator_page, function(err, response, body) {
 
+                    var $ = cheerio.load(body);
+                    data.summary = $('#member-summary').text();
+                    collection.insert(data, function(err, docs) {
 
-   				 request('http://www.aph.gov.au/'+data.legislator_page, function(err, response, body) {
-   				 	
-   				 	var $ = cheerio.load(body);
-   				 	data.summary = $('#member-summary').text();
-   				 	collection.insert(data, function(err, docs) {
-   				 		
-                parseLegislators(legislators);
+                        parseLegislators(legislators);
                     });
 
-                console.log(data);
+                    console.log(data);
 
-   				 });
-
-
-
-
+                });
 
             } else {
                 //do nothing
@@ -76,9 +72,6 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
         //     collection.insert(data, function(err, docs) {
 
         // });
-
-
-
         // });
     });
 });
