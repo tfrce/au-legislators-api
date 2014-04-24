@@ -27,7 +27,7 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
                 data.email = ($('.mail', legislator).attr('href'));
                 data.legislator_page = ($('.title a', legislator).attr('href'));
                 data.party = ($('dt:contains("Party")', legislator).next().text());
-                data.member_for = ($('dt:contains("Member")', legislator).text());//not working
+                data.member_for = $('dl dd', legislator).eq(0).text();//not working (senator or member for)
 
                 request('http://www.aph.gov.au/' + data.legislator_page, function(err, response, body) {
 
