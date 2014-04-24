@@ -12,9 +12,7 @@ var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Res
 var postcode_object = {};
 function postcode_objectify(postcode_array) {
     for (var j = 0; j < postcode_array.length; j++) {
-      
        if (postcode_array[j][1] in postcode_object) {
-
         postcode_object[postcode_array[j][1]].push(postcode_array[j][0]);
        } else {
         postcode_object[postcode_array[j][1]] = [postcode_array[j][0]];
@@ -42,24 +40,29 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
 
                 var data = {};
 
-                data.name = ($('.title a', legislator).text());
-                data.img_url = ($('img', legislator).attr('src'));
-                data.twitter = ($('.twitter', legislator).attr('href'));
-                data.facebook = ($('.facebook', legislator).attr('href'));
-                data.email = ($('.mail', legislator).attr('href'));
-                data.legislator_page = ($('.title a', legislator).attr('href'));
-                data.party = ($('dt:contains("Party")', legislator).next().text());
+                data.name = $('.title a', legislator).text();
+                data.img_url = $('img', legislator).attr('src');
+                data.twitter = $('.twitter', legislator).attr('href');
+                data.facebook = $('.facebook', legislator).attr('href');
+                data.email = $('.mail', legislator).attr('href');
+                data.legislator_page = $('.title a', legislator).attr('href');
+                data.party = $('dt:contains("Party")', legislator).next().text();
                 var location = $('dl dd', legislator).eq(0).text(); // make more specific (senator or member for)
                 location = location.split(',');
                 data.state = location[1];
-                data.suburb = location[0];
-                data.postcode = postcode_object[location[0]];
+                data.electorate = location[0];
+                data.postcode = postcode_object[data.electorate];
                 
 
                 request('http://www.aph.gov.au/' + data.legislator_page, function(err, response, body) {
 
                     var $ = cheerio.load(body);
-                    data.summary = $('#member-summary').text();
+                    // data.summary = $('#member-summary').text();
+                    var second_column = $('.col-third').eq(1).html();
+                    data.electorate_office_phone = $('dt:contains("phone")',second_column).next().text();
+                    data.electorate_office_fax = $('dt:contains("Fax")',second_column).next().text();
+                    data.electorate_office_toll_free = $('dt:contains("Free")',second_column).next().text();
+
                     collection.insert(data, function(err, docs) {
 
                         parseLegislators(legislators);
