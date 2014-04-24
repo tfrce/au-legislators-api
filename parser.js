@@ -18,11 +18,32 @@ var MongoClient = require('mongodb').MongoClient,
 //  });
 
 var csv = require('csv');
+
+function postcode_objectify(postcode_array) {
+    var postcode_object = {};
+    for (var j = 0; j < postcode_array.length; j++) {
+       
+       if (postcode_array[j][1] in postcode_object) {
+
+       
+        postcode_object[postcode_array[j][1]] = postcode_object[postcode_array[j][1]]+','+postcode_array[j][0];
+
+       } else {
+       	
+        postcode_object[postcode_array[j][1]] = postcode_array[j][0];
+
+       }
+    }
+    console.log(postcode_object);
+};
+
+
+
 csv()
-.from.path(__dirname+'/postcodes.csv', { delimiter: ',', escape: '"' })
-.to.array( function(datac){
-  console.log(datac)
-} );
+.from.path(__dirname + '/postcodes.csv', { delimiter: ',', escape: '"'})
+.to.array(function(dataX) { 
+	postcode_objectify(dataX); 
+});
 
 
 
@@ -48,7 +69,7 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
                 data.email = ($('.mail', legislator).attr('href'));
                 data.legislator_page = ($('.title a', legislator).attr('href'));
                 data.party = ($('dt:contains("Party")', legislator).next().text());
-                data.member_for = $('dl dd', legislator).eq(0).text();// make more specific (senator or member for)
+                data.member_for = $('dl dd', legislator).eq(0).text(); // make more specific (senator or member for)
                 data.postcode = [];
 
                 request('http://www.aph.gov.au/' + data.legislator_page, function(err, response, body) {
