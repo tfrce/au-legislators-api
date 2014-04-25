@@ -19,7 +19,6 @@ function postcode_objectify(postcode_array) {
             postcode_object[postcode_array[j][1]] = [postcode_array[j][0]];
         }
     }
-    // console.log(postcode_object);
 };
 
 function postcode_to_state(postcode) {
@@ -44,13 +43,13 @@ function postcode_to_state(postcode) {
 console.log(postcode_to_state(2222)); //test
 
 csv()
-    .from.path(__dirname + '/postcodes.csv', {
-        delimiter: ',',
-        escape: '"'
-    })
-    .to.array(function(dataX) {
-        postcode_objectify(dataX);
-    });
+.from.path(__dirname + '/postcodes.csv', {
+    delimiter: ',',
+    escape: '"'
+})
+.to.array(function(dataX) {
+    postcode_objectify(dataX);
+});
 
 MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
     if (err) throw err;
@@ -81,21 +80,20 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
                 data.postcode = postcode_object[data.electorate_location];
                 data.contact_form = $('.btn-contact-form').attr('href');
 
-
                 request('http://www.aph.gov.au/' + data.legislator_page, function(err, response, body) {
 
                     var $ = cheerio.load(body);
                     // data.summary = $('#member-summary').text();
                     var second_column = $('.col-third').eq(1).html();
-                    var last_column = $('.col-last').html();
-
+                    var last_column = $('.col-third').eq(2).html();
+                    // var last_column = $('.col-last').eq(0).html();
+                    console.log(last_column);
                     data.electorate_office_phone = $('dt:contains("phone")', second_column).next().text();
                     data.electorate_office_fax = $('dt:contains("Fax")', second_column).next().text();
                     data.electorate_office_toll_free = $('dt:contains("Free")', second_column).next().text();//broken
-                    data.websites = $('dt:contains("websites")',last_column).next().text();
+                    data.websites = $('dt:contains("ebsites")',last_column).next('dd').children('a').attr('href');
 
                     collection.insert(data, function(err, docs) {
-
                         parseLegislators(legislators);
                     });
 
@@ -128,10 +126,7 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
         //         twitter: twitter,
         //         legislator_page: legislator_page
         //     }
-
-
         //     collection.insert(data, function(err, docs) {
-
         // });
         // });
     });
