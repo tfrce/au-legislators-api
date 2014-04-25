@@ -41,7 +41,7 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
 
 
     app.get('/', function(req, res) {
-        res.send("hello");
+        res.send("hello  \n  /legislators?postcode=4000 \n for example.");
     });
     app.get('/legislators', function(req, res) {
 
@@ -66,7 +66,7 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
         } else{
              collection.find().toArray(function(err, docs) {
                 res.send({
-                    legislators: senate_docs.concat(docs)
+                    legislators: docs
                 });
             });
         }
