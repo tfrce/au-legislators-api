@@ -71,6 +71,7 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
                 data.facebook = $('.facebook', legislator).attr('href');
                 data.email = $('.mail', legislator).attr('href');
                 data.legislator_page = base_url + $('.title a', legislator).attr('href');
+                data.MPID = data.legislator_page.match(/MPID\=(.*)/)[1];
                 data.party = $('dt:contains("Party")', legislator).next().text();
                 
                 var location = $('dl dd', legislator).eq(0).text(); // make more specific (senator or member for)
