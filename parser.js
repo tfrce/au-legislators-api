@@ -8,6 +8,7 @@ var MongoClient = require('mongodb').MongoClient,
 
 // var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?q=&mem=1&sen=1&par=-1&gen=0&ps=5&st=1';
 var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?expand=1&q=&mem=1&par=-1&gen=0&ps=25'
+var base_url = 'http://www.aph.gov.au';
 
 var postcode_object = {};
 
@@ -47,8 +48,8 @@ csv()
     delimiter: ',',
     escape: '"'
 })
-.to.array(function(dataX) {
-    postcode_objectify(dataX);
+.to.array(function(csv_data) {
+    postcode_objectify(csv_data);
 });
 
 MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
@@ -83,22 +84,24 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
                 request('http://www.aph.gov.au/' + data.legislator_page, function(err, response, body) {
 
                     var $ = cheerio.load(body);
-                    // data.summary = $('#member-summary').text();
                     var second_column = $('.col-third').eq(1).html();
-                    var last_column = $('.col-third').eq(2).html();
-                    // var last_column = $('.col-last').eq(0).html();
-                    console.log(last_column);
+                    var third_column = $('.col-third').eq(2).html();
+                    var websites = $('')
+
                     data.electorate_office_phone = $('dt:contains("phone")', second_column).next().text();
                     data.electorate_office_fax = $('dt:contains("Fax")', second_column).next().text();
                     data.electorate_office_toll_free = $('dt:contains("Free")', second_column).next().text();//broken
-                    data.websites = $('dt:contains("ebsites")',last_column).next('dd').children('a').attr('href');
+            
+                    data.personal_website = $('a:contains("Personal website")',third_column).attr('href');
+                    data.party_website = $('a:contains("Party website")',third_column).attr('href');
+                    data.alternative_url = base_url + $('h3:contains("Alternative URL")',third_column).next().children('a').attr('href');
+
 
                     collection.insert(data, function(err, docs) {
                         parseLegislators(legislators);
                     });
 
                     console.log(data);
-
                 });
 
             } else {
