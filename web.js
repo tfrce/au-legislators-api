@@ -37,22 +37,40 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
     var collection = db.collection('legislators');
 
     app.use(logfmt.requestLogger());
-    app.get('/legislators/', function(req, res) {
+    
+
+
+    app.get('/', function(req, res) {
+        res.send("hello");
+    });
+    app.get('/legislators', function(req, res) {
 
         var postcode = req.query.postcode;
+        if(postcode){
+            
         var state = postcode_to_state(postcode);
+
+
 
         
 
         var senate_docs ="";
         collection.find({ state:state, member_type:'senate' }).toArray(function(err, docs) {
             senate_docs = docs;
-        collection.find({ postcodes:postcode, member_type:'house' }).toArray(function(err, docs) {
-            res.send({
-                legislators: senate_docs.concat(docs)
+            collection.find({ postcodes:postcode, member_type:'house' }).toArray(function(err, docs) {
+                res.send({
+                    legislators: senate_docs.concat(docs)
+                });
             });
         });
-        });
+        } else{
+             collection.find().toArray(function(err, docs) {
+                res.send({
+                    legislators: senate_docs.concat(docs)
+                });
+            });
+        }
+
 
 
 
