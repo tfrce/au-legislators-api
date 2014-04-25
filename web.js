@@ -42,12 +42,19 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
         var postcode = req.query.postcode;
         var state = postcode_to_state(postcode);
 
-
-        collection.find( { postcodes:postcode } ).toArray(function(err, docs) {
+        var senate_docs ="";
+        collection.find({ state:state, member_type:'senate' }).toArray(function(err, docs) {
+            // res.send({
+            //     legislators: docs
+            // });
+            senate_docs = docs;
+        });
+        collection.find({ postcodes:postcode, member_type:'house' }).toArray(function(err, docs) {
             res.send({
-                legislators: docs
+                legislators: senate_docs.concat(docs)
             });
         });
+
 
     });
     console.log(process.env.MONGOHQ_URL);
