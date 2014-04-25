@@ -70,7 +70,7 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
                 data.twitter = $('.twitter', legislator).attr('href');
                 data.facebook = $('.facebook', legislator).attr('href');
                 data.email = $('.mail', legislator).attr('href');
-                data.legislator_page = $('.title a', legislator).attr('href');
+                data.legislator_page = base_url + $('.title a', legislator).attr('href');
                 data.party = $('dt:contains("Party")', legislator).next().text();
                 
                 var location = $('dl dd', legislator).eq(0).text(); // make more specific (senator or member for)
@@ -79,9 +79,9 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
                 data.state = location[1];
                 data.electorate_location = location[0];
                 data.postcode = postcode_object[data.electorate_location];
-                data.contact_form = $('.btn-contact-form').attr('href');
+                data.contact_form = base_url + $('.btn-contact-form').attr('href');
 
-                request('http://www.aph.gov.au/' + data.legislator_page, function(err, response, body) {
+                request( data.legislator_page, function(err, response, body ) {
 
                     var $ = cheerio.load(body);
                     var second_column = $('.col-third').eq(1).html();
