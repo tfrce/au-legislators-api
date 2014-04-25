@@ -9,6 +9,27 @@ var MongoClient = require('mongodb').MongoClient,
 
 var app = express();
 
+function postcode_to_state(postcode) {
+    if ((postcode >= 2600 && postcode <= 2618) || (String(postcode).substring(0, 2) == '29')) {
+        return 'Australian Capital Territory';
+    } else if (String(postcode).charAt(0) == '2') {
+        return 'New South Wales';
+    } else if (String(postcode).charAt(0) == '3') {
+        return 'Victoria';
+    } else if (String(postcode).charAt(0) == '4') {
+        return 'Queensland';
+    } else if (String(postcode).charAt(0) == '5') {
+        return 'South Australia';
+    } else if (String(postcode).charAt(0) == '6') {
+        return 'Western Australia';
+    } else if (String(postcode).charAt(0) == '7') {
+        return 'Tasmania';
+    } else if (String(postcode).charAt(0) == '8' || String(postcode).charAt(0) == '9') {
+        return 'Northern Territory';
+    }
+};
+
+
 app.use(cors());
 
 MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
@@ -18,7 +39,11 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
     app.use(logfmt.requestLogger());
     app.get('/', function(req, res) {
 
-        collection.find().toArray(function(err, docs) {
+        var postcode = req.query.postcode;
+        var state = postcode_to_state(postcode);
+
+
+        collection.find( { postcodes:postcode } ).toArray(function(err, docs) {
             res.send({
                 legislators: docs
             });

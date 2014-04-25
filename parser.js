@@ -7,7 +7,7 @@ var MongoClient = require('mongodb').MongoClient,
     format = require('util').format;
 
 // var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?q=&mem=1&sen=1&par=-1&gen=0&ps=5&st=1';
-var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?expand=1&q=&mem=1&par=-1&gen=0&ps=25'
+var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?q=&mem=1&sen=1&par=-1&gen=0&ps=100&st=1'
 var base_url = 'http://www.aph.gov.au';
 
 var postcode_object = {};
@@ -21,27 +21,6 @@ function postcode_objectify(postcode_array) {
         }
     }
 };
-
-function postcode_to_state(postcode) {
-    if ((postcode >= 2600 && postcode <= 2618) || (String(postcode).substring(0, 2) == '29')) {
-        return 'ACT';
-    } else if (String(postcode).charAt(0) == '2') {
-        return 'NSW';
-    } else if (String(postcode).charAt(0) == '3') {
-        return 'VIC';
-    } else if (String(postcode).charAt(0) == '4') {
-        return 'QLD';
-    } else if (String(postcode).charAt(0) == '5') {
-        return 'SA';
-    } else if (String(postcode).charAt(0) == '6') {
-        return 'WA';
-    } else if (String(postcode).charAt(0) == '7') {
-        return 'TAS';
-    } else if (String(postcode).charAt(0) == '8' || String(postcode).charAt(0) == '9') {
-        return 'NT';
-    }
-};
-console.log(postcode_to_state(2222)); //test
 
 csv()
 .from.path(__dirname + '/postcodes.csv', {
@@ -65,6 +44,7 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
 
                 var data = {};
 
+                
                 data.name = $('.title a', legislator).text();
                 data.img_url = $('img', legislator).attr('src');
                 data.twitter = $('.twitter', legislator).attr('href');
@@ -77,9 +57,20 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
                 var location = $('dl dd', legislator).eq(0).text(); // make more specific (senator or member for)
                 location = location.split(',');
 
-                data.state = location[1];
+                if (location.length>1){
+                // house members
+                data.member_type ="house";    
+                data.state = location[1] && location[1].trim() || '';
                 data.electorate_location = location[0];
-                data.postcode = postcode_object[data.electorate_location];
+                data.postcodes = postcode_object[data.electorate_location];
+                } else{
+                //senate members
+                data.member_type ="senate";    
+                data.state = location[0];
+                data.electorate_location = location[0];
+                data.postcodes = [];
+                }
+                
                 data.contact_form = base_url + $('.btn-contact-form').attr('href');
 
                 request( data.legislator_page, function(err, response, body ) {
