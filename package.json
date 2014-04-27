@@ -8,21 +8,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rolandnsharp/legislators-api.git"
+    "url": "https://github.com/tfrce/au-legislators-api.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/rolandnsharp/legislators-api/issues"
+    "url": "https://github.com/tfrce/au-legislators-api/issues"
   },
-  "homepage": "https://github.com/rolandnsharp/legislators-api",
+  "homepage": "https://github.com/tfrce/au-legislators-api",
   "dependencies": {
     "async": "^0.7.0",
     "cheerio": "^0.15.0",
     "cors": "^2.2.0",
     "csv": "^0.3.7",
     "express": "^4.0.0",
-    "fast-csv": "^0.2.4",
     "lodash": "^2.4.1",
     "logfmt": "^1.1.2",
     "mongodb": "^1.4.0",

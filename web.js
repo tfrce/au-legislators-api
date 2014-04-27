@@ -29,7 +29,6 @@ function postcode_to_state(postcode) {
     }
 };
 
-
 app.use(cors());
 
 MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
@@ -38,22 +37,15 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
 
     app.use(logfmt.requestLogger());
     
-
-
     app.get('/', function(req, res) {
         res.send("hello  \n  /legislators?postcode=4000 \n for example.");
     });
     app.get('/legislators', function(req, res) {
 
         var postcode = req.query.postcode;
+
         if(postcode){
-            
         var state = postcode_to_state(postcode);
-
-
-
-        
-
         var senate_docs ="";
         collection.find({ state:state, member_type:'senate' }).toArray(function(err, docs) {
             senate_docs = docs;
@@ -70,9 +62,6 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
                 });
             });
         }
-
-
-
 
     });
     console.log(process.env.MONGOHQ_URL);
