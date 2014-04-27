@@ -7,7 +7,8 @@ var MongoClient = require('mongodb').MongoClient,
     format = require('util').format;
 
 // var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?q=&mem=1&sen=1&par=-1&gen=0&ps=5&st=1';
-var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?q=&mem=1&sen=1&par=-1&gen=0&ps=100&st=1'
+var page_number = 1;
+var url = 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?page='+page_number+'&q=&mem=1&sen=1&par=-1&gen=0&ps=100&st=1';
 var base_url = 'http://www.aph.gov.au';
 
 var postcode_object = {};
@@ -23,18 +24,22 @@ function postcode_objectify(postcode_array) {
 };
 
 csv()
-.from.path(__dirname + '/postcodes.csv', {
-    delimiter: ',',
-    escape: '"'
-})
-.to.array(function(csv_data) {
-    postcode_objectify(csv_data);
-});
+    .from.path(__dirname + '/postcodes.csv', {
+        delimiter: ',',
+        escape: '"'
+    })
+    .to.array(function(csv_data) {
+        postcode_objectify(csv_data);
+    });
 
 MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
     if (err) throw err;
     var collection = db.collection('legislators');
     collection.remove({}, function(err, removed) {}); // remove entire collection
+    for (var i = 1; i <=3; i++) {
+    url= 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?page='+i+'&q=&mem=1&sen=1&par=-1&gen=0&ps=100&st=1';
+        
+
     request(url, function(err, response, body) {
         var $ = cheerio.load(body);
 
@@ -44,7 +49,6 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
 
                 var data = {};
 
-                
                 data.name = $('.title a', legislator).text();
                 data.img_url = $('img', legislator).attr('src');
                 data.twitter = $('.twitter', legislator).attr('href');
@@ -53,27 +57,27 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
                 data.legislator_page = base_url + $('.title a', legislator).attr('href');
                 data.MPID = data.legislator_page.match(/MPID\=(.*)/)[1];
                 data.party = $('dt:contains("Party")', legislator).next().text();
-                
+
                 var location = $('dl dd', legislator).eq(0).text(); // make more specific (senator or member for)
                 location = location.split(',');
 
-                if (location.length>1){
-                // house members
-                data.member_type ="house";    
-                data.state = location[1] && location[1].trim() || '';
-                data.electorate_location = location[0];
-                data.postcodes = postcode_object[data.electorate_location];
-                } else{
-                //senate members
-                data.member_type ="senate";    
-                data.state = location[0];
-                data.electorate_location = location[0];
-                data.postcodes = [];
+                if (location.length > 1) {
+                    // house members
+                    data.member_type = "house";
+                    data.state = location[1] && location[1].trim() || '';
+                    data.electorate_location = location[0];
+                    data.postcodes = postcode_object[data.electorate_location];
+                } else {
+                    //senate members
+                    data.member_type = "senate";
+                    data.state = location[0];
+                    data.electorate_location = location[0];
+                    data.postcodes = [];
                 }
-                
+
                 data.contact_form = base_url + $('.btn-contact-form').attr('href');
 
-                request( data.legislator_page, function(err, response, body ) {
+                request(data.legislator_page, function(err, response, body) {
 
                     var $ = cheerio.load(body);
                     var second_column = $('.col-third').eq(1).html();
@@ -82,11 +86,11 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
 
                     data.electorate_office_phone = $('dt:contains("phone")', second_column).next().text();
                     data.electorate_office_fax = $('dt:contains("Fax")', second_column).next().text();
-                    data.electorate_office_toll_free = $('dt:contains("Free")', second_column).next().text();//broken
-            
-                    data.personal_website = $('a:contains("Personal website")',third_column).attr('href');
-                    data.party_website = $('a:contains("Party website")',third_column).attr('href');
-                    data.alternative_url = base_url + $('h3:contains("Alternative URL")',third_column).next().children('a').attr('href');
+                    data.electorate_office_toll_free = $('dt:contains("Free")', second_column).next().text(); //broken
+
+                    data.personal_website = $('a:contains("Personal website")', third_column).attr('href');
+                    data.party_website = $('a:contains("Party website")', third_column).attr('href');
+                    data.alternative_url = base_url + $('h3:contains("Alternative URL")', third_column).next().children('a').attr('href');
 
 
                     collection.insert(data, function(err, docs) {
@@ -110,19 +114,7 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
         });
 
         parseLegislators(legislators_array);
-        // _.each(legislators, function(legislator, index) {
-        //     var img_url = ($('img', legislator).attr('src'));
-        //     var name = ($('.title a', legislator).text());
-        //     var twitter = ($('.twitter', legislator).attr('href'));
-        //     var legislator_page = ($('.title a', legislator).attr('href'));
-        //     var data = {
-        //         name: name,
-        //         img_url: img_url,
-        //         twitter: twitter,
-        //         legislator_page: legislator_page
-        //     }
-        //     collection.insert(data, function(err, docs) {
-        // });
-        // });
+      
     });
+    };
 });
