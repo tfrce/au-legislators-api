@@ -1,8 +1,8 @@
 // web.js
-
-var cors = require('cors');
-var express = require('express');
-var logfmt = require('logfmt');
+//require node modules (see package.json)
+var cors = require("cors");
+var express = require("express");
+var logfmt = require("logfmt");
 
 var MongoClient = require('mongodb').MongoClient,
     format = require('util').format;
@@ -38,7 +38,7 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
     app.use(logfmt.requestLogger());
     
     app.get('/', function(req, res) {
-        res.send('hello  <br />  /legislators?postcode=4000 <br /> for example.');
+        res.send("hello  \n  /legislators?postcode=4000 \n for example.");
     });
     app.get('/legislators', function(req, res) {
 
@@ -68,7 +68,7 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
 
     var port = Number(process.env.PORT || 5000);
     app.listen(port, function() {
-        console.log('Listening on ' + port);
+        console.log("Listening on " + port);
     });
 
 });

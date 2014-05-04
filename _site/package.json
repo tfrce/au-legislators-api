@@ -1,0 +1,30 @@
+{
+  "name": "legislators-api",
+  "version": "0.0.0",
+  "description": "legislators-api ===============",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tfrce/au-legislators-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tfrce/au-legislators-api/issues"
+  },
+  "homepage": "https://github.com/tfrce/au-legislators-api",
+  "dependencies": {
+    "async": "^0.7.0",
+    "cheerio": "^0.15.0",
+    "cors": "^2.2.0",
+    "csv": "^0.3.7",
+    "express": "^4.0.0",
+    "lodash": "^2.4.1",
+    "logfmt": "^1.1.2",
+    "mongodb": "^1.4.0",
+    "request": "^2.34.0"
+  }
+}

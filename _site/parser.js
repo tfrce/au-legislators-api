@@ -33,7 +33,7 @@ MongoClient.connect(process.env.MONGOHQ_URL, function(err, db) {
     if (err) throw err;
     var collection = db.collection('legislators');
     collection.remove({}, function(err, removed) {}); // remove entire collection
-    for (var i = 1; i <=3; i++) {  //for the three pages - requires update to detect number of pages
+    for (var i = 1; i <=3; i++) {
     url= 'http://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?page='+i+'&q=&mem=1&sen=1&par=-1&gen=0&ps=100&st=1';
         
 
